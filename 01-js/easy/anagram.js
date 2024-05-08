@@ -5,10 +5,10 @@
 */
 
 function isAnagram(str1, str2) {
-  return cleanString(str1) === cleanString(str2);
-}
-function cleanString(str) {
-  return str.replace(/[^\w]/g).toLowerCase().split("").sort().join();
+  let newStr1 =  str1.toLowerCase().split('').sort().join();
+  let newStr2 =  str2.toLowerCase().split('').sort().join();
+
+  return newStr1 == newStr2
 }
 
 module.exports = isAnagram;
