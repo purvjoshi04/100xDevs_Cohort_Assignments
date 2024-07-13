@@ -26,7 +26,7 @@ router.post("/signin", async (req, res) => {
 
   const username = req.body.userName;
   const password = req.body.password;
-  console.log(process.env.JWT_SECRET);
+  // console.log(process.env.JWT_SECRET);
 
   const user = await User.find({
     username,
@@ -35,10 +35,9 @@ router.post("/signin", async (req, res) => {
 
   if (user) {
     const token = jwt.sign(
-      {
-        username,
-      },
-      process.env.JWT_SECRET
+      { username: user.username }, 
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' } 
     );
 
     res.json({
@@ -51,24 +50,72 @@ router.post("/signin", async (req, res) => {
   }
 });
 
+// router.post("/courses", adminMiddleware, async (req, res) => {
+//   // Implement course creation logic
+
+//   const authHeader = req.headers.authorization;
+
+//   if(!authHeader){
+//     return res.status(401).json({
+//       message: "Authorization header is missing"
+//     })
+//   }
+
+//   const token = authHeader.split(" ")[1];
+//   try {
+//     jwt.verify(token, process.env.JWT_SECRET);
+//   } catch (error) {
+//     res.status(401).json({
+//       message: "Invalid Token",
+//       error: error.message
+//     })
+//   }
+//   const title = req.body.title;
+//   const description = req.body.description;
+//   const imageLink = req.body.imageLink;
+//   const price = req.body.price;
+
+//   const newCourse = await Course.create({
+//     title,
+//     description,
+//     imageLink,
+//     price,
+//   });
+
+//   res.json({
+//     message: "Course created successfully",
+//     courseId: newCourse._id,
+//   });
+// });
+
 router.post("/courses", adminMiddleware, async (req, res) => {
-  // Implement course creation logic
-  const title = req.body.title;
-  const description = req.body.description;
-  const imageLink = req.body.imageLink;
-  const price = req.body.price;
+    try {
+        const { title, description, imageLink, price } = req.body;
 
-  const newCourse = await Course.create({
-    title,
-    description,
-    imageLink,
-    price,
-  });
+        if (!title || !description || !imageLink || !price) {
+            return res.status(400).json({
+                message: "Missing required fields"
+            });
+        }
 
-  res.json({
-    massage: "Course created successfully",
-    courseId: newCourse._id,
-  });
+        const newCourse = await Course.create({
+            title,
+            description,
+            imageLink,
+            price,
+        });
+
+        res.json({
+            message: "Course created successfully",
+            courseId: newCourse._id,
+        });
+    } catch (error) {
+        console.error("Error creating course:", error);
+        res.status(500).json({
+            message: "Error creating course",
+            error: error.message
+        });
+    }
 });
 
 router.get("/courses", adminMiddleware, async (req, res) => {
